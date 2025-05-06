@@ -1,0 +1,84 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import accuracy_score
+
+# ------------------------
+# Step 1: Data Preparation
+# ------------------------
+
+# Monthly rainfall data for the year 2012
+months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", 
+          "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+
+rainfall_values = [799.0, 1174.8, 865.1, 1334.6, 635.4, 
+                   918.5, 685.5, 998.6, 784.2, 985.0, 
+                   882.8, 1071.0]
+
+# Creating a time vector for plotting
+time = np.arange(2012, 2013, 1/12)
+
+# Creating a DataFrame
+df = pd.DataFrame({
+    "Month": months,
+    "Year": 2012,
+    "Rainfall (mm)": rainfall_values
+})
+
+# Encode month names as numbers (e.g., Jan=0, Feb=1, ..., Dec=11)
+label_encoder = LabelEncoder()
+df['Month_encoded'] = label_encoder.fit_transform(df['Month'])
+
+# -----------------------------
+# Step 2: Classification Labels
+# -----------------------------
+
+# Classify rainfall as High (1) or Low (0) based on average
+mean_rainfall = np.mean(rainfall_values)
+df['Rainfall_Class'] = (df['Rainfall (mm)'] > mean_rainfall).astype(int)
+
+# -----------------------------
+# Step 3: Splitting the Dataset
+# -----------------------------
+
+X = df[['Month_encoded']]       # Feature
+y = df['Rainfall_Class']        # Label (0 or 1)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# -----------------------------
+# Step 4: Random Forest Classifier
+# -----------------------------
+
+clf = RandomForestClassifier(n_estimators=100, random_state=42)
+clf.fit(X_train, y_train)
+
+# Predict and evaluate
+y_pred = clf.predict(X_test)
+accuracy = accuracy_score(y_test, y_pred)
+
+# -----------------------------
+# Step 5: Output & Visualization
+# -----------------------------
+
+# Print classification accuracy
+print(f'Classification Accuracy: {accuracy:.2f}\n')
+
+# Print full data in table format
+print("Rainfall Data Table:\n")
+print(df[['Month', 'Rainfall (mm)', 'Month_encoded', 'Rainfall_Class']].to_string(index=False))
+
+# Plotting time series rainfall data
+plt.figure(figsize=(7, 5))
+plt.plot(time, rainfall_values, linestyle='-', marker='o', color='black')
+plt.title("Rainfall Time Series (2012)")
+plt.xlabel("Time")
+plt.ylabel("Rainfall (mm)")
+plt.grid(True)
+plt.tight_layout()
+plt.show()
