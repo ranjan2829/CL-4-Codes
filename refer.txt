@@ -1,0 +1,13 @@
+n = int(input())
+m = int(input())
+q = int(input())
+labels = [input().strip() for _ in range(n)]
+root = Node(labels[0])
+tree = buildTree(root, m, labels)
+locker = LockingTree(root)
+queries = []
+for _ in range(q):
+    opcode, label, uid = input().split()
+    queries.append((int(opcode), label, int(uid)))
+locker.processQueries(queries)
+locker.printOutput()
